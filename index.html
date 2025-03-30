@@ -40,7 +40,7 @@
 
 <body class="w3-light-grey w3-content" style="max-width:1600px">
 
-    <!-- Sidebar/menu -->
+    <!-- Sidebar/menu  -->
     <nav class="w3-sidebar w3-bar-block w3-white w3-animate-left w3-text-grey w3-collapse w3-top w3-center"
         style="z-index:3;width:300px;font-weight:bold;height:100vh;position:fixed;" id="mySidebar">
         <br>
@@ -76,130 +76,144 @@
         <div class="w3-hide-large" style="margin-top:83px"></div>
 
         <!-- Photo grid -->
-        <div class="w3-row">
-            <div class="w3-third">
-                <img src="images/art/cat.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="A boy surrounded by beautiful nature">
-                <img src="images/art/clockwork.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="What a beautiful scenery this sunset">
-                <img src="images/art/coloredVines.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="The Beach. Me. Alone. Beautiful">
-            </div>
-
-            <div class="w3-third">
-                <img src="images/art/dog.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="Quiet day at the beach. Cold, but beautiful">
-                <img src="images/art/faces1.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="Waiting for the bus in the desert">
-                <img src="images/art/headDress.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="Nature again.. At its finest!">
-            </div>
-
-            <div class="w3-third">
-                <img src="images/art/manRope.jpg" style="width:100%" onclick="onClick(this)" alt="Canoeing again">
-                <img src="images/art/metro.jpg" style="width:100%" onclick="onClick(this)"
-                    alt="A girl, and a train passing">
-                <img src="images/art/woman.jpg" style="width:100%" onclick="onClick(this)" alt="What a beautiful day!">
-            </div>
-        </div>
+        <div id="photo-grid" class="w3-row"></div>
 
         <!-- Pagination -->
         <div class="w3-center w3-padding-32">
             <div class="w3-bar">
-                <a href="#" class="w3-bar-item w3-button w3-hover-black">«</a>
-                <a href="#" class="w3-bar-item w3-black w3-button">1</a>
-                <a href="#" class="w3-bar-item w3-button w3-hover-black">2</a>
-                <a href="#" class="w3-bar-item w3-button w3-hover-black">3</a>
-                <a href="#" class="w3-bar-item w3-button w3-hover-black">4</a>
-                <a href="#" class="w3-bar-item w3-button w3-hover-black">»</a>
+                <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="changeSet(currentSet - 1)">«</a>
+                <a href="#" class="w3-bar-item w3-button page-btn" onclick="changeSet(1)">1</a>
+                <a href="#" class="w3-bar-item w3-button page-btn" onclick="changeSet(2)">2</a>
+                <a href="#" class="w3-bar-item w3-button page-btn" onclick="changeSet(3)">3</a>
+                <a href="#" class="w3-bar-item w3-button page-btn" onclick="changeSet(4)">4</a>
+                <a href="#" class="w3-bar-item w3-button w3-hover-black" onclick="changeSet(currentSet + 1)">»</a>
             </div>
         </div>
 
-        <!-- Modal for full size images on click-->
-        <div id="modal01" class="w3-modal w3-black" style="padding-top:0" onclick="this.style.display='none'">
-            <span class="w3-button w3-black w3-xlarge w3-display-topright">×</span>
-            <div class="w3-modal-content w3-animate-zoom w3-center w3-transparent w3-padding-64">
-                <img id="img01" class="w3-image">
-                <p id="caption"></p>
-            </div>
+        <script>
+            let currentSet = 1; // Start with set 1
+
+            function changeSet(setIndex) {
+                if (setIndex < 1 || setIndex > 4) return; // Prevent invalid sets
+                currentSet = setIndex;
+                fetchImages();
+                updatePagination(); // Update the button highlight
+            }
+
+            function fetchImages() {
+                fetch("image_order.json") // Fetch JSON instead of PHP
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data[currentSet]) {
+                            updateGrid(data[currentSet]);
+                        } else {
+                            console.error("No images found for set", currentSet);
+                        }
+                    })
+                    .catch(error => console.error("Error loading images:", error));
+            }
+
+            function updateGrid(images) {
+                const grid = document.getElementById("photo-grid");
+                grid.innerHTML = ""; // Clear current images
+
+                let html = '<div class="w3-third">';
+                images.forEach((file, index) => {
+                    let src = `images/art/set${currentSet}/${file}`;
+                    html += `<img src="${src}" style="width:100%" onclick="onClick(this)">`;
+                    if ((index + 1) % 3 === 0) html += '</div><div class="w3-third">';
+                });
+                html += '</div>';
+
+                grid.innerHTML = html;
+            }
+
+            function updatePagination() {
+                document.querySelectorAll(".page-btn").forEach(btn => {
+                    btn.classList.remove("w3-black");
+                    if (parseInt(btn.innerText) === currentSet) {
+                        btn.classList.add("w3-black");
+                    }
+                });
+            }
+
+            fetchImages();
+            updatePagination();
+        </script>
+    </div>
+
+
+    <!-- Modal for full size images on click-->
+    <div id="modal01" class="w3-modal w3-black" style="padding-top:0" onclick="this.style.display='none'">
+        <span class="w3-button w3-black w3-xlarge w3-display-topright">×</span>
+        <div class="w3-modal-content w3-animate-zoom w3-center w3-transparent w3-padding-64">
+            <img id="img01" class="w3-image">
+            <p id="caption"></p>
         </div>
+    </div>
 
-        <!-- About section -->
-        <div class="w3-container w3-dark-grey w3-center w3-text-light-grey w3-padding-32" id="about">
-            <h4><b>About Me</b></h4>
-            <img src="images/annaProfile.jpg" alt="Me" class="w3-image w3-padding-32" width="200" height="250">
-            <div class="w3-content w3-justify" style="max-width:600px">
-                <h4>Anna</h4>
-                <p>Lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                    commodo consequat. Duis aute irure
-                    dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                    sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-                    consectetur adipiscing elit, sed do eiusmod tempor
-                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </p>
-                <hr class="w3-opacity">
-                <h4 class="w3-padding-16">Technical Skills</h4>
-                <p class="w3-wide">Photography</p>
-                <div class="w3-white">
-                    <div class="w3-container w3-padding-small w3-center w3-grey" style="width:95%">95%</div>
-                </div>
-                <p class="w3-wide">Web Design</p>
-                <div class="w3-white">
-                    <div class="w3-container w3-padding-small w3-center w3-grey" style="width:85%">85%</div>
-                </div>
-                <p class="w3-wide">Photoshop</p>
-                <div class="w3-white">
-                    <div class="w3-container w3-padding-small w3-center w3-grey" style="width:80%">80%</div>
-                </div>
-                <p><button class="w3-button w3-light-grey w3-padding-large w3-margin-top w3-margin-bottom">Download
-                        Resume</button></p>
-                <hr class="w3-opacity">
+    <!-- About section -->
+    <div class="w3-container w3-dark-grey w3-center w3-text-light-grey w3-padding-32" id="about">
+        <h4><b>About Me</b></h4>
+        <img src="images/annaProfile.jpg" alt="Me" class="w3-image w3-padding-32" width="200" height="250">
+        <div class="w3-content w3-justify" style="max-width:600px">
+            <h4>Anna</h4>
+            <p>Lorem ipsum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                commodo consequat. Duis aute irure
+                dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+                consectetur adipiscing elit, sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </p>
+            <hr class="w3-opacity">
+            <p><button class="w3-button w3-light-grey w3-padding-large w3-margin-top w3-margin-bottom">Download
+                    Resume</button></p>
+            <hr class="w3-opacity">
 
-                <!-- Contact section with AOS animation -->
-                <div class="w3-container w3-light-grey w3-padding-32 w3-padding-large" id="contact" data-aos="fade-up">
-                    <div class="w3-content" style="max-width:600px">
-                        <h4 class="w3-center"><b>Contact Me</b></h4>
-                        <p>I do commissions! Looking for a unique piece of art? Get in touch :)</p>
-                        <p><b><i class="fab fa-instagram"></i> Instagram:</b> <a
-                                href="https://www.instagram.com/annymask/" target="_blank"
-                                class="w3-hover-opacity">@annymask</a></p>
-                        <p><b><i class="fas fa-envelope"></i> Email:</b> <a
-                                href="mailto:annymask@gmail.com">annymask@gmail.com</a></p>
-                    </div>
+            <!-- Contact section with AOS animation -->
+            <div class="w3-container w3-light-grey w3-padding-32 w3-padding-large" id="contact" data-aos="fade-up">
+                <div class="w3-content" style="max-width:600px">
+                    <h4 class="w3-center"><b>Contact Me</b></h4>
+                    <p>I do commissions! Looking for a unique piece of art? Get in touch :)</p>
+                    <p><b><i class="fab fa-instagram"></i> Instagram:</b> <a href="https://www.instagram.com/annymask/"
+                            target="_blank" class="w3-hover-opacity">@annymask</a></p>
+                    <p><b><i class="fas fa-envelope"></i> Email:</b> <a
+                            href="mailto:annymask@gmail.com">annymask@gmail.com</a></p>
                 </div>
-
-                <!-- AOS (Animate On Scroll) JS -->
-                <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
-                <script>
-                    AOS.init(); // Initialize AOS animations
-                </script>
-
-                <!-- End page content -->
             </div>
 
+            <!-- AOS (Animate On Scroll) JS -->
+            <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
             <script>
-                // Script to open and close sidebar
-                function w3_open() {
-                    document.getElementById("mySidebar").style.display = "block";
-                    document.getElementById("myOverlay").style.display = "block";
-                }
-
-                function w3_close() {
-                    document.getElementById("mySidebar").style.display = "none";
-                    document.getElementById("myOverlay").style.display = "none";
-                }
-
-                // Modal Image Gallery
-                function onClick(element) {
-                    document.getElementById("img01").src = element.src;
-                    document.getElementById("modal01").style.display = "block";
-                    var captionText = document.getElementById("caption");
-                    captionText.innerHTML = element.alt;
-                }
-
+                AOS.init(); // Initialize AOS animations
             </script>
+
+            <!-- End page content -->
+        </div>
+
+        <script>
+            // Script to open and close sidebar
+            function w3_open() {
+                document.getElementById("mySidebar").style.display = "block";
+                document.getElementById("myOverlay").style.display = "block";
+            }
+
+            function w3_close() {
+                document.getElementById("mySidebar").style.display = "none";
+                document.getElementById("myOverlay").style.display = "none";
+            }
+
+            // Modal Image Gallery
+            function onClick(element) {
+                document.getElementById("img01").src = element.src;
+                document.getElementById("modal01").style.display = "block";
+                var captionText = document.getElementById("caption");
+                captionText.innerHTML = element.alt;
+            }
+
+        </script>
 
 
 </body>
